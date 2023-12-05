@@ -1,5 +1,5 @@
 import renderer from 'react-test-renderer'; //you will need this for the snapshot test
-import { cleanup, fireEvent, render } from '@testing-library/react'; //this is for the DOM testing
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'; //this is for the DOM testing
 import { screen } from '@testing-library/dom';//this is for the DOM testing
 import { Search } from '../../src/components/Search';
 
@@ -13,8 +13,12 @@ import { Search } from '../../src/components/Search';
 //Start here: https://testing-library.com/docs/example-findByText
 //Look for the line that says: 'describe('findByText Examples', () => {'
 
-test('REPLACE_ME', async () => {
-    expect("REPLACE_ME").toBe("REPLACE_ME");
+test('the search field has some text typed in', async () => {
+    render(<Search />)
+    const inputSearchForm = screen.getByRole('textbox');
+    expect(inputSearchForm.value).toBe("");
+    fireEvent.change(inputSearchForm, { target: { value: 'Spain' } });
+    expect(inputSearchForm.value).toBe("Spain");
 });
 
 //TODO: write a snapshot test that captures the Search.js component
@@ -22,16 +26,34 @@ test('REPLACE_ME', async () => {
 //Look at this doc to help you write the test: https://jestjs.io/docs/snapshot-testing
 
 test('Search box renders correctly', () => {
-    expect("REPLACE_ME").toBe("REPLACE_ME");
+
+    const searchBoxCorrect = <Search />;//Search should be self contained to work properly
+
+    const treeCorrect = renderer
+    .create(searchBoxCorrect)
+    .toJSON();
+    expect(treeCorrect).toMatchSnapshot();
 });
 
 
 //TODO: write a test to check that the Error component appears if no data 
-
 //is found from the call to the API. You will need another mock.
 
-//This is is a hard test to write - try the getCountryByName.test.js test first!
+//This is a hard test to write - try the getCountryByName.test.js test first!
 
-test('REPLACE_ME', async () => {
-    expect("REPLACE_ME").toBe("REPLACE_ME");
-});
+// jest.mock();
+
+/* test('the Error component appears if no data is found from the call to the API', async () => {
+    render(<Search />)
+    const inputSearchForm = screen.getByRole('textbox');
+    expect(inputSearchForm.value).toBe("");
+    fireEvent.change(inputSearchForm, { target: { value: 'xyz' } });
+    expect(inputSearchForm.value).toBe("xyz");
+    const searchButton = screen.getByRole("button");
+    fireEvent.click(searchButton);
+    
+    await waitFor(() => {
+        expect(screen.getByRole('img', {value: /error image/i})).toBeInTheDocument();
+    });
+    
+}); */
