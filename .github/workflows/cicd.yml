@@ -27,7 +27,6 @@ jobs:
     - name: Build
       run: npm run build
     # TODO: Deploy to github pages
-
 ## TIP
 ## to conditionally run a job or a step use the if key.
 # if: github.event_name == 'push' && github.ref == 'refs/heads/main' 
