@@ -11,27 +11,36 @@ on:
 
 jobs:
   test-build:
-    name: Test & Build
+    permissions:
+      contents: write
+    name: Test & Build & Deploy
     runs-on: ubuntu-22.04
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 16.x
-    - name: Install dependencies
-      run: npm ci
-    - name: Run tests
-      run: npm test
-    - name: Build
-      run: npm run build
-    # TODO: Deploy to github pages
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build
+        run: npm run build
+        env:
+          VITE_APP_PUBLIC_URL: /example-react-cicd/
+      - name: Deploying to gh-pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
 ## TIP
 ## to conditionally run a job or a step use the if key.
-# if: github.event_name == 'push' && github.ref == 'refs/heads/main' 
+# if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-## TIP 
+## TIP
 ## deploy steps and permissions for the Github token needed to deploy to gh-pages
 #   permissions:
 #     contents: write
@@ -42,7 +51,7 @@ jobs:
 #         github_token: ${{ secrets.GITHUB_TOKEN }}
 #         publish_dir: ./dist
 
-## TIP: 
+## TIP:
 ## to deploy to GH pages, set this env var in the build step
 # - name: Build
 #   env:
