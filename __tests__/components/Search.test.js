@@ -1,10 +1,14 @@
-import renderer from 'react-test-renderer'; //you will need this for the snapshot test
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'; //this is for the DOM testing
-import { screen } from '@testing-library/dom';//this is for the DOM testing
-import { Search } from '../../src/components/Search';
+import renderer from "react-test-renderer"; //you will need this for the snapshot test
+import { cleanup, render, waitFor } from "@testing-library/react"; //this is for the DOM testing
+import { screen } from "@testing-library/dom"; //this is for the DOM testing
+import userEvent from "@testing-library/user-event";
+import '@testing-library/jest-dom';
+import { Search } from "../../src/components/Search";
+import axios from "axios";
+
+jest.mock("axios");
 
 //TODO: write a test that checks that the search field has some text typed in
-
 //You'll need to use Queries to find the elements you're looking for:
 // https://testing-library.com/docs/queries/about/
 // And you'll need to simulate someone clicking on the button:
@@ -13,47 +17,40 @@ import { Search } from '../../src/components/Search';
 //Start here: https://testing-library.com/docs/example-findByText
 //Look for the line that says: 'describe('findByText Examples', () => {'
 
-test('the search field has some text typed in', async () => {
-    render(<Search />)
-    const inputSearchForm = screen.getByRole('textbox');
-    expect(inputSearchForm.value).toBe("");
-    fireEvent.change(inputSearchForm, { target: { value: 'Spain' } });
-    expect(inputSearchForm.value).toBe("Spain");
+test("the search field has some text typed in", async () => {
+	const user = userEvent.setup();
+    render(<Search />);
+	const inputSearchForm = screen.getByRole("textbox");
+	expect(inputSearchForm.value).toBe("");
+    await user.type(inputSearchForm, "Spain");
+	expect(inputSearchForm.value).toBe("Spain");
 });
 
 //TODO: write a snapshot test that captures the Search.js component
-
 //Look at this doc to help you write the test: https://jestjs.io/docs/snapshot-testing
 
-test('Search box renders correctly', () => {
+test("Search box renders correctly", () => {
+	const searchBoxCorrect = <Search />; //Search should be self contained to work properly
 
-    const searchBoxCorrect = <Search />;//Search should be self contained to work properly
-
-    const treeCorrect = renderer
-    .create(searchBoxCorrect)
-    .toJSON();
-    expect(treeCorrect).toMatchSnapshot();
+	const treeCorrect = renderer.create(searchBoxCorrect).toJSON();
+	expect(treeCorrect).toMatchSnapshot();
 });
 
+//TODO: write a test to check that the Error component appears if no data is found from the call to the API.
+test("the Error component appears if no data is found from the call to the API", async () => {
+	axios.get.mockResolvedValue({});
+    const user = userEvent.setup();
 
-//TODO: write a test to check that the Error component appears if no data 
-//is found from the call to the API. You will need another mock.
+	render(<Search />);
+	const inputSearchForm = screen.getByRole("textbox");
+	expect(inputSearchForm.value).toBe("");
+	await user.type(inputSearchForm,"xyz");
+	expect(inputSearchForm.value).toBe("xyz");
+	const searchButton = screen.getByRole("button");
 
-//This is a hard test to write - try the getCountryByName.test.js test first!
+	await user.click(searchButton);
 
-// jest.mock();
-
-/* test('the Error component appears if no data is found from the call to the API', async () => {
-    render(<Search />)
-    const inputSearchForm = screen.getByRole('textbox');
-    expect(inputSearchForm.value).toBe("");
-    fireEvent.change(inputSearchForm, { target: { value: 'xyz' } });
-    expect(inputSearchForm.value).toBe("xyz");
-    const searchButton = screen.getByRole("button");
-    fireEvent.click(searchButton);
-    
-    await waitFor(() => {
-        expect(screen.getByRole('img', {value: /error image/i})).toBeInTheDocument();
-    });
-    
-}); */
+	await waitFor(() => {
+		expect(screen.getByRole("img", {name: /error image/i})).toBeInTheDocument();
+	});
+});

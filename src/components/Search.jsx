@@ -19,7 +19,7 @@ export const Search = () => {
         const data = await getCountryByName(inputValue);
         setCountries(data);
         setInputValue('');
-        data.forEach( async cty => {
+        data?.forEach( async cty => {
             await newReliclogs(`Country Searched: ${ cty.name.common }`);
         });
     };    
